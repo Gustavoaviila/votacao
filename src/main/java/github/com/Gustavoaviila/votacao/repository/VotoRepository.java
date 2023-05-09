@@ -6,6 +6,6 @@ import github.com.Gustavoaviila.votacao.domain.Voto;
 
 public interface VotoRepository extends JpaRepository<Voto, Long> {
 
-  boolean existsByAssociadoIdAndPautaId(Long associadoId, Long pautaId);
+  boolean existsByAssociadoIdAndSessaoVotacaoId(Long associadoId, Long sessaoId);
 }
 
