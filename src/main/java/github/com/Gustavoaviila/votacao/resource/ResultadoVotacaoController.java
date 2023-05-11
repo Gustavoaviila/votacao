@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import github.com.Gustavoaviila.votacao.domain.dto.ResultadoVotacaoDTO;
 import github.com.Gustavoaviila.votacao.service.ResultadoVotacaoService;
 
@@ -19,7 +18,6 @@ public class ResultadoVotacaoController {
 
   @PostMapping
   public ResponseEntity<ResultadoVotacaoDTO> gerarResultado(@RequestBody ResultadoVotacaoDTO dto){
-    dto = service.gerarResultado(dto);
-    return ResponseEntity.ok().body(dto);
+    return ResponseEntity.ok().body(service.gerarResultado(dto));
   }
 }

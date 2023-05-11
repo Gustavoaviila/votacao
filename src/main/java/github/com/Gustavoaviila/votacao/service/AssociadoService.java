@@ -12,7 +12,6 @@ import github.com.Gustavoaviila.votacao.domain.Associado;
 import github.com.Gustavoaviila.votacao.domain.dto.AssociadoDTO;
 import github.com.Gustavoaviila.votacao.repository.AssociadoRepository;
 import github.com.Gustavoaviila.votacao.service.exceptions.DatabaseException;
-import github.com.Gustavoaviila.votacao.service.exceptions.ObjectNotFound;
 import github.com.Gustavoaviila.votacao.service.exceptions.ResourceNotFoundException;
 
 @Service
@@ -27,11 +26,11 @@ public class AssociadoService {
 
   public Associado findById(Long id) {
     Optional<Associado> associado = repository.findById(id);
-    return associado.get();
+    return associado.orElseThrow(() -> new ResourceNotFoundException(id));
   }
     @Transactional
     public Associado insert(AssociadoDTO dto) {
-    Associado associado = new Associado();
+      var associado = new Associado();
     associado = convertDtoToEntity(dto);
     return repository.save(associado);
   }
@@ -60,7 +59,8 @@ public class AssociadoService {
 
   public Associado convertDtoToEntity (AssociadoDTO dto){
 
-    Associado associado = new Associado();
+    var associado = new Associado();
+    associado.setId(dto.getId());
     associado.setCpf(dto.getCpf());
     associado.setNome(dto.getNome());
     return associado;
@@ -68,7 +68,8 @@ public class AssociadoService {
 
   public AssociadoDTO convertEntityToDto (Associado associado){
 
-    AssociadoDTO dto = new AssociadoDTO();
+    var dto = new AssociadoDTO();
+    dto.setId(associado.getId());
     dto.setCpf(associado.getCpf());
     dto.setNome(associado.getNome());
     return dto;

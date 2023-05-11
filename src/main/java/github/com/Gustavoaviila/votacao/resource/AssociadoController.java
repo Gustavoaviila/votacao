@@ -37,7 +37,7 @@ public class AssociadoController {
 
   @GetMapping("{id}")
   public ResponseEntity<AssociadoDTO> findById(@PathVariable Long id){
-    Associado associado = service.findById(id);
+    var associado = service.findById(id);
     AssociadoDTO dto = service.convertEntityToDto(associado);
     return ResponseEntity.ok().body(dto);
 
@@ -45,11 +45,10 @@ public class AssociadoController {
 
   @PostMapping
   public ResponseEntity<AssociadoDTO> insert (@RequestBody AssociadoDTO dto){
-    Associado associado = new Associado();
+    var associado = new Associado();
     associado = service.insert(dto);
-    service.convertEntityToDto(associado);
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(associado.getId()).toUri();
-    return ResponseEntity.created(uri).body(dto);
+    return ResponseEntity.created(uri).body(service.convertEntityToDto(associado));
   }
 
   @DeleteMapping("/{id}")
@@ -60,7 +59,7 @@ public class AssociadoController {
 
   @PutMapping("/{id}")
   public ResponseEntity<AssociadoDTO> update (@PathVariable Long id, @RequestBody AssociadoDTO dto){
-    Associado associado = new Associado();
+    var associado = new Associado();
     associado = service.update(id, dto);
     dto = service.convertEntityToDto(associado);
     return ResponseEntity.ok().body(dto);

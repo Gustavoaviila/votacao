@@ -34,14 +34,14 @@ public class SessaoVotacaoController {
 
   @GetMapping("{id}")
   public ResponseEntity<SessaoVotacaoDTO> findById(@PathVariable Long id){
-    SessaoVotacao sessaoVotacao = service.findById(id);
-    SessaoVotacaoDTO dto = service.convertEntityToDto(sessaoVotacao);
+    var sessaoVotacao = service.findById(id);
+    var dto = service.convertEntityToDto(sessaoVotacao);
     return ResponseEntity.ok().body(dto);
   }
 
   @PostMapping
   public ResponseEntity<SessaoVotacaoDTO> abrirSessao(@RequestBody SessaoVotacaoDTO dto) {
-    SessaoVotacao sessaoAberta = service.abrirSessao(dto);
+    var sessaoAberta = service.abrirSessao(dto);
     dto = service.convertEntityToDto(sessaoAberta);
     return ResponseEntity.status(HttpStatus.CREATED).body(dto);
   }

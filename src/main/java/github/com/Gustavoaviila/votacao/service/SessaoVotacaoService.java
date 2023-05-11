@@ -13,8 +13,6 @@ import github.com.Gustavoaviila.votacao.domain.Pauta;
 import github.com.Gustavoaviila.votacao.domain.SessaoVotacao;
 import github.com.Gustavoaviila.votacao.domain.dto.SessaoVotacaoDTO;
 import github.com.Gustavoaviila.votacao.repository.SessaoVotacaoRepository;
-import github.com.Gustavoaviila.votacao.repository.VotoRepository;
-import github.com.Gustavoaviila.votacao.service.exceptions.ObjectNotFound;
 import github.com.Gustavoaviila.votacao.service.exceptions.ResourceNotFoundException;
 
 
@@ -29,8 +27,8 @@ public class SessaoVotacaoService {
 
   @Transactional
   public SessaoVotacao abrirSessao(SessaoVotacaoDTO dto){
-    verificaPautaEDuracao(dto);
-    SessaoVotacao sessaoVotacao = new SessaoVotacao();
+    dto = verificaPautaEDuracao(dto);
+    var sessaoVotacao = new SessaoVotacao();
     sessaoVotacao = convertDtoToEntity(dto);
     return repository.save(sessaoVotacao);
   }
@@ -40,47 +38,45 @@ public class SessaoVotacaoService {
   }
 
   public SessaoVotacao findById(Long id){
-    Optional<SessaoVotacao> sessaoVotacao = Optional.empty();
-        sessaoVotacao = repository.findById(id);
-    return sessaoVotacao.get();
+    var sessaoVotacao = repository.findById(id);
+    return sessaoVotacao.orElseThrow(() -> new ResourceNotFoundException(id));
   }
 
   public SessaoVotacao convertDtoToEntity (SessaoVotacaoDTO dto){
 
-    SessaoVotacao sessaoVotacao = new SessaoVotacao();
+    var sessaoVotacao = new SessaoVotacao();
+    sessaoVotacao.setId(dto.getId());
     sessaoVotacao.setInicio(dto.getInicio());
     sessaoVotacao.setFim(dto.getFim());
-    sessaoVotacao.setPauta(dto.getPauta());
+    sessaoVotacao.setPauta(pautaService.convertDtoToEntity(dto.getPautaDTO()));
     sessaoVotacao.setDuracao(dto.getDuracao());
     return sessaoVotacao;
   }
 
   public SessaoVotacaoDTO convertEntityToDto (SessaoVotacao sessaoVotacao){
 
-    SessaoVotacaoDTO dto = new SessaoVotacaoDTO();
+    var dto = new SessaoVotacaoDTO();
+    dto.setId(sessaoVotacao.getId());
     dto.setInicio(sessaoVotacao.getInicio());
     dto.setFim(sessaoVotacao.getFim());
-    dto.setPauta(sessaoVotacao.getPauta());
+    dto.setPautaDTO(pautaService.convertEntityToDto(sessaoVotacao.getPauta()));
     dto.setDuracao(sessaoVotacao.getDuracao());
     return dto;
   }
 
   public List<SessaoVotacaoDTO> convertListaEntityToListDto (List<SessaoVotacao> sessoesVotacao){
     List<SessaoVotacaoDTO> dtos = new ArrayList<>();
-    for(SessaoVotacao sessao : sessoesVotacao){
+    for(var sessao : sessoesVotacao){
       dtos.add(convertEntityToDto(sessao));
     }
     return dtos;
   }
 
   public SessaoVotacaoDTO verificaPautaEDuracao(SessaoVotacaoDTO dto){
-    if (Objects.isNull(dto.getPauta())){
-      throw new ResourceNotFoundException(dto.getPauta().getId());
-    }
 
-    Optional<Pauta> pauta = Optional.ofNullable(pautaService.findById(dto.getPauta().getId()));
+    var pauta = pautaService.findById(dto.getPautaDTO().getId());
 
-    dto.setPauta(pauta.get());
+    dto.setPautaDTO(pautaService.convertEntityToDto(pauta));
     dto.setInicio(LocalDateTime.now());
     if (Objects.isNull(dto.getDuracao())){
       dto.setDuracao(0L);

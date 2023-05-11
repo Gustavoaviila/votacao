@@ -1,19 +1,14 @@
 package github.com.Gustavoaviila.votacao.service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import github.com.Gustavoaviila.votacao.domain.Associado;
-import github.com.Gustavoaviila.votacao.domain.SessaoVotacao;
 import github.com.Gustavoaviila.votacao.domain.Voto;
 import github.com.Gustavoaviila.votacao.domain.dto.VotoDTO;
-import github.com.Gustavoaviila.votacao.repository.AssociadoRepository;
-import github.com.Gustavoaviila.votacao.repository.SessaoVotacaoRepository;
 import github.com.Gustavoaviila.votacao.repository.VotoRepository;
-import github.com.Gustavoaviila.votacao.service.exceptions.ObjectNotAvailable;
-import github.com.Gustavoaviila.votacao.service.exceptions.ObjectNotFound;
+import github.com.Gustavoaviila.votacao.service.exceptions.ObjectNotAvailableException;
 import github.com.Gustavoaviila.votacao.service.exceptions.SessionNotAvailableException;
 
 @Service
@@ -32,41 +27,42 @@ public class VotoService {
   public Voto votar(VotoDTO dto) {
     dto = setVoto(dto);
 
-    if(dto.getSessaoVotacao().getFim().isBefore(LocalDateTime.now())){
+    if(dto.getSessaoVotacaoDTO().getFim().isBefore(LocalDateTime.now())){
       throw new SessionNotAvailableException("Essa sessao ja esta encerrada");
     }
 
-    if (repository.existsByAssociadoIdAndSessaoVotacaoId(dto.getAssociado().getId(), dto.getSessaoVotacao().getId())) {
-      throw new ObjectNotAvailable("O associado já votou nesta sessao");
+    if (repository.existsByAssociadoIdAndSessaoVotacaoId(dto.getAssociadoDTO().getId(), dto.getSessaoVotacaoDTO().getId())) {
+      throw new ObjectNotAvailableException("O associado já votou nesta sessao");
     }
 
-    return repository.save(convertDtoToEntity(dto));
+    var voto = convertDtoToEntity(dto);
+    return repository.save(voto);
   }
 
   public Voto convertDtoToEntity (VotoDTO dto){
-    Voto voto = new Voto();
-    voto.setAssociado(dto.getAssociado());
+    var voto = new Voto();
+    voto.setAssociado(associadoService.convertDtoToEntity(dto.getAssociadoDTO()));
     voto.setOpcaoVoto(dto.getOpcaoVoto());
-    voto.setSessaoVotacao(dto.getSessaoVotacao());
+    voto.setSessaoVotacao(sessaoService.convertDtoToEntity(dto.getSessaoVotacaoDTO()));
     return voto;
   }
 
   public VotoDTO convertEntityToDto (Voto voto){
 
-    VotoDTO dto = new VotoDTO();
-    dto.setAssociado(voto.getAssociado());
+    var dto = new VotoDTO();
+    dto.setAssociadoDTO(associadoService.convertEntityToDto(voto.getAssociado()));
     dto.setOpcaoVoto(voto.getOpcaoVoto());
-    dto.setSessaoVotacao(voto.getSessaoVotacao());
+    dto.setSessaoVotacaoDTO(sessaoService.convertEntityToDto(voto.getSessaoVotacao()));
     return dto;
   }
 
   private VotoDTO setVoto(VotoDTO dto){
-    Optional<Associado> associado = Optional.ofNullable(associadoService.findById(dto.getAssociado().getId()));
+    var associado = associadoService.findById(dto.getAssociadoDTO().getId());
 
-    Optional<SessaoVotacao> sessaoVotacao = Optional.ofNullable(sessaoService.findById(dto.getSessaoVotacao().getId()));
+    var sessaoVotacao = sessaoService.findById(dto.getSessaoVotacaoDTO().getId());
 
-    dto.setSessaoVotacao(sessaoVotacao.get());
-    dto.setAssociado(associado.get());
+    dto.setSessaoVotacaoDTO(sessaoService.convertEntityToDto(sessaoVotacao));
+    dto.setAssociadoDTO(associadoService.convertEntityToDto(associado));
     return dto;
   }
 }

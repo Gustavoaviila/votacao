@@ -13,7 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SessaoVotacaoDTO {
 
-  private Pauta pauta;
+  private Long id;
+  private PautaDTO pautaDTO;
   private LocalDateTime inicio;
   private LocalDateTime fim;
   private Long duracao;

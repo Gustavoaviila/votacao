@@ -12,11 +12,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PautaDTO {
 
+  private Long id;
   private String titulo;
 
   public PautaDTO convertEntityToDto (Pauta pauta){
 
     PautaDTO dto = new PautaDTO();
+    dto.setId(pauta.getId());
     dto.setTitulo(pauta.getTitulo());
     return dto;
   }

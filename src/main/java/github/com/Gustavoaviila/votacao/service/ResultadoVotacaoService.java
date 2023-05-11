@@ -1,34 +1,44 @@
 package github.com.Gustavoaviila.votacao.service;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
+import com.google.gson.Gson;
 import github.com.Gustavoaviila.votacao.Enum.OpcaoVoto;
-import github.com.Gustavoaviila.votacao.domain.SessaoVotacao;
 import github.com.Gustavoaviila.votacao.domain.Voto;
 import github.com.Gustavoaviila.votacao.domain.dto.ResultadoVotacaoDTO;
-import github.com.Gustavoaviila.votacao.repository.SessaoVotacaoRepository;
+
 
 @Service
 public class ResultadoVotacaoService {
 
   @Autowired
-  private SessaoVotacaoRepository sessaoVotacaoRepository;
+  private SessaoVotacaoService sessaoVotacaoService;
+
+  @Autowired
+  private PautaService pautaService;
+
+  @Autowired
+  private RabbitMQService rabbitMQService;
+
+  @Value("${client.csm.queue-name}")
+  private String queueName;
 
   public ResultadoVotacaoDTO gerarResultado(ResultadoVotacaoDTO dto){
-    Optional<SessaoVotacao> sessaoVotacao = sessaoVotacaoRepository.findById(dto.getSessaoVotacao().getId());
+    var sessaoVotacao = sessaoVotacaoService.findById(dto.getSessaoVotacaoDTO().getId());
     dto.setVotosSim(0L);
     dto.setVotosNao(0L);
-    dto.setPauta(sessaoVotacao.get().getPauta());
-    dto.setTotalVotos(sessaoVotacao.get().getVotos().size() + 1L);
-    for (Voto voto : sessaoVotacao.get().getVotos()){
+    dto.setPautaDTO(pautaService.convertEntityToDto(sessaoVotacao.getPauta()));
+    dto.setSessaoVotacaoDTO(sessaoVotacaoService.convertEntityToDto(sessaoVotacao));
+    dto.setTotalVotos(sessaoVotacao.getVotos().size() + 0L);
+    for (Voto voto : sessaoVotacao.getVotos()){
       if(voto.getOpcaoVoto().equals(OpcaoVoto.SIM)){
         dto.setVotosSim(dto.getVotosSim() + 1);
       } else
         dto.setVotosNao(dto.getVotosNao() + 1);
     }
+
+    rabbitMQService.sendMessage(queueName, new Gson().toJson(dto));
     return dto;
   }
 }

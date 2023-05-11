@@ -36,18 +36,17 @@ public class PautaController {
 
   @GetMapping("{id}")
   public ResponseEntity<PautaDTO> findById(@PathVariable Long id){
-    Pauta pauta = service.findById(id);
-    PautaDTO dto = service.convertEntityToDto(pauta);
+    var pauta = service.findById(id);
+    var dto = service.convertEntityToDto(pauta);
     return ResponseEntity.ok().body(dto);
 
   }
 
   @PostMapping
   public ResponseEntity<PautaDTO> createPauta(@RequestBody  PautaDTO pautaDTO) {
-    Pauta pauta = service.createPauta(pautaDTO);
+    var pauta = service.createPauta(pautaDTO);
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(pauta.getId()).toUri();
-    pautaDTO.convertEntityToDto(pauta);
-    return ResponseEntity.created(uri).body(pautaDTO);
+    return ResponseEntity.created(uri).body(pautaDTO.convertEntityToDto(pauta));
   }
 
 }

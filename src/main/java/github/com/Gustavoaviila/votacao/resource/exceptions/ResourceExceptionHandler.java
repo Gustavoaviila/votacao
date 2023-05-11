@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import github.com.Gustavoaviila.votacao.service.exceptions.DatabaseException;
-import github.com.Gustavoaviila.votacao.service.exceptions.ObjectNotAvailable;
+import github.com.Gustavoaviila.votacao.service.exceptions.ObjectNotAvailableException;
 import github.com.Gustavoaviila.votacao.service.exceptions.ResourceNotFoundException;
 import github.com.Gustavoaviila.votacao.service.exceptions.SessionNotAvailableException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,31 +15,39 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
-  @ExceptionHandler(ObjectNotAvailable.class)
-  public ResponseEntity<StandardError> objectNotAvailable(ObjectNotAvailable ex, HttpServletRequest request){
-    StandardError error = new StandardError(LocalDateTime.now(),
-        HttpStatus.NO_CONTENT.value(), ex.getMessage(), request.getRequestURI());
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(error);
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<StandardError> resourceNotFound(ResourceNotFoundException e, HttpServletRequest request){
+    String error = "Resource not found";
+    HttpStatus status = HttpStatus.NOT_FOUND;
+    StandardError err = new StandardError(LocalDateTime.now(),
+        status.value(), error, e.getMessage(), request.getRequestURI());
+    return ResponseEntity.status(status).body(err);
   }
 
   @ExceptionHandler(DatabaseException.class)
-  public ResponseEntity<StandardError> dataBaseException(DatabaseException ex, HttpServletRequest request){
-    StandardError error = new StandardError(LocalDateTime.now(),
-        HttpStatus.NO_CONTENT.value(), ex.getMessage(), request.getRequestURI());
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(error);
-  }
-
-  @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<StandardError> resourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request){
-    StandardError error = new StandardError(LocalDateTime.now(),
-        HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getRequestURI());
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  public ResponseEntity<StandardError> dataBaseException(DatabaseException e, HttpServletRequest request){
+    String error = "Database error";
+    HttpStatus status = HttpStatus.BAD_REQUEST;
+    StandardError err = new StandardError(LocalDateTime.now(),
+        status.value(), error, e.getMessage(), request.getRequestURI());
+    return ResponseEntity.status(status).body(err);
   }
 
   @ExceptionHandler(SessionNotAvailableException.class)
-  public ResponseEntity<StandardError> sessionNotAvailableException(SessionNotAvailableException ex, HttpServletRequest request){
-    StandardError error = new StandardError(LocalDateTime.now(),
-        HttpStatus.NOT_ACCEPTABLE.value(), ex.getMessage(), request.getRequestURI());
-    return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(error);
+  public ResponseEntity<StandardError> sessionNotAvailable(SessionNotAvailableException e, HttpServletRequest request){
+    String error = "Session not Available";
+    HttpStatus status = HttpStatus.FORBIDDEN;
+    StandardError err = new StandardError(LocalDateTime.now(),
+        status.value(), error, e.getMessage(), request.getRequestURI());
+    return ResponseEntity.status(status).body(err);
+  }
+
+  @ExceptionHandler(ObjectNotAvailableException.class)
+  public ResponseEntity<StandardError> objectNotAvailable(ObjectNotAvailableException e, HttpServletRequest request){
+    String error = "Object not available";
+    HttpStatus status = HttpStatus.CONFLICT;
+    StandardError err = new StandardError(LocalDateTime.now(),
+        status.value(), error, e.getMessage(), request.getRequestURI());
+    return ResponseEntity.status(status).body(err);
   }
 }

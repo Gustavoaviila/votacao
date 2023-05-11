@@ -3,6 +3,9 @@ package github.com.Gustavoaviila.votacao.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +38,7 @@ public class SessaoVotacao {
   @JoinColumn(name = "pauta_id", nullable = false)
   private Pauta pauta;
 
+  @JsonIgnore
   @OneToMany(mappedBy = "sessaoVotacao")
   private List<Voto> votos = new ArrayList<>();
 }
