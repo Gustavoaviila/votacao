@@ -1,11 +1,12 @@
-client:
-  csm:
-    queue-name: ${CLIENT_CSM_QUEUE_NAME:resultado-votacao}
 spring:
+#  datasource:
+#    url: jdbc:postgresql://containers-us-west-155.railway.app:6215/railway
+#    username: postgres
+#    password: f3nmjFXaAxRuD4pAMEvj
   datasource:
-    url: jdbc:postgresql://containers-us-west-155.railway.app:6215/railway
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
-    password: f3nmjFXaAxRuD4pAMEvj
+    password: postgres
 
   jpa:
     hibernate:
