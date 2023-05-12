@@ -18,12 +18,6 @@ public class ResultadoVotacaoService {
   @Autowired
   private PautaService pautaService;
 
-  @Autowired
-  private RabbitMQService rabbitMQService;
-
-  @Value("${client.csm.queue-name}")
-  private String queueName;
-
   public ResultadoVotacaoDTO gerarResultado(ResultadoVotacaoDTO dto){
     var sessaoVotacao = sessaoVotacaoService.findById(dto.getSessaoVotacaoDTO().getId());
     dto.setVotosSim(0L);
@@ -38,7 +32,6 @@ public class ResultadoVotacaoService {
         dto.setVotosNao(dto.getVotosNao() + 1);
     }
 
-    rabbitMQService.sendMessage(queueName, new Gson().toJson(dto));
     return dto;
   }
 }
